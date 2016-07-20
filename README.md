@@ -7,4 +7,4 @@ Refer to http://www.appcoda.com/push-notification-ios/ tutorial to manage notifi
 How-To :
 - Replace 'apns-prod.pem' by your certificate file path on PEM_FILE_PATH constant,
 - Replace device token by token of iPhone/iPad where you want to send notification.
-- run script as : php test.php5
+- Run script as : php test.php5
