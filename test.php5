@@ -20,7 +20,6 @@ if($context) {
 
     try {
 
-
         if(stream_context_set_option($context, 'ssl', 'local_cert', PEM_FILE_PATH)) {
 
             set_error_handler(function() {
@@ -33,7 +32,7 @@ if($context) {
 
             if(!$socket) {
 
-                throw  new Exception('Failed to connect : error code ' . $err);
+                throw  new Exception('Failed to connect : error code' . $err);
             }
 
             $payload = json_encode($body);
