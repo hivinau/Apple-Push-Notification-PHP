@@ -1,8 +1,10 @@
 <?php
 
-define('DEVICE_TOKEN', '351e186497b20325eeda0762420dd522a1f2ab9dcd495e4fbd2aec673f86b2f0');
+define('DEVICE_TOKEN', '79e8f6a1e13b06ee6b09f60626e6edcd2c58a5b49de154382fd6832cb89cc0c8'); /* for iphone 6 */
 define('PEM_FILE_PATH', 'apns-prod.pem');
-define('APPLE_PUSH_URL', 'ssl://gateway.sandbox.push.apple.com:2195');
+define('PEM_PASSPHRASE', 'fdapps');
+define('APPLE_PUSH_HOST', 'gateway.push.apple.com'); // gateway.sandbox.push.apple.com  /* FOR DEV */
+define('APPLE_PUSH_PORT', 2195);
 
 $alertMessage = 'Notification message from \'' . gethostname() . '\'';
 $badgeCount = 1;
@@ -11,6 +13,7 @@ $body = array();
 $body['aps'] = array();
 $body['aps']['alert'] = $alertMessage;
 $body['aps']['badge'] = $badgeCount;
+$body['aps']['sound'] = 'default';
 
 $context = stream_context_create();
 
@@ -20,19 +23,30 @@ if($context) {
 
     try {
 
-        if(stream_context_set_option($context, 'ssl', 'local_cert', PEM_FILE_PATH)) {
+        if(stream_context_set_option($context, 'ssl', 'local_cert', PEM_FILE_PATH) &&
+            stream_context_set_option($context, 'ssl', 'passphrase', PEM_PASSPHRASE)) {
 
             set_error_handler(function() {
                 return true;
             }, E_ALL);
 
-            $socket = stream_socket_client(APPLE_PUSH_URL, $err, $errstr, ini_get("default_socket_timeout"), STREAM_CLIENT_CONNECT, $context);
+            $tryCount = 1;
+
+            $url = sprintf('ssl://%s:%s', APPLE_PUSH_HOST, APPLE_PUSH_PORT);
+
+            while(!($socket = stream_socket_client($url, $err, $errstr, ini_get("default_socket_timeout"), STREAM_CLIENT_CONNECT, $context))) {
+
+                echo 'Failed to connect : (error code ' . $err . '). Try again...' . PHP_EOL;
+                sleep(5.0);
+
+                $tryCount++;
+            }
 
             restore_error_handler();
 
-            if(!$socket) {
+            if($tryCount > 1) {
 
-                throw  new Exception('Failed to connect : error code' . $err);
+                echo 'Connection established after '. $tryCount . 'attempts' . PHP_EOL;
             }
 
             $payload = json_encode($body);
@@ -43,7 +57,7 @@ if($context) {
             $message .= pack('n', strlen($payload));
             $message .= $payload;
 
-            $status = fwrite($socket, $message);
+            $status = fwrite($socket, $message, strlen($message));
 
             if ($status === false) {
 
@@ -63,7 +77,9 @@ if($context) {
 
         if($socket) {
 
-            fclose($socket);
+            $isClosed = fclose($socket);
+
+            echo $isClosed ? 'Socket closed.' . PHP_EOL : 'Issue appears while closing socket.' . PHP_EOL;
         }
     }
 } else {
