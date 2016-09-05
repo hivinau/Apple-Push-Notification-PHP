@@ -1,5 +1,14 @@
 <?php
 
+//ToDo:
+//Need 2 files :
+//- certificate .p12
+//- private key .p12
+//Please, take a look at https://www.raywenderlich.com/123862/push-notifications-tutorial
+//to create these files before run this script...
+//run on terminal : 
+// > php PemGenerator.php5
+
 function ReadStdin($prompt) {
 
     while(!isset($input) || !file_exists($input) || (isset($info) && $info->getExtension() != 'p12')) {
