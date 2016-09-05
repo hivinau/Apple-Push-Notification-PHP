@@ -29,7 +29,7 @@ function ReadStdin($prompt) {
 
                 if($info->getExtension() != 'p12') {
 
-                    echo 'File \'' . $input . '\' is not valid a .p12 file.' . PHP_EOL;
+                    echo 'File \'' . $input . '\' is not a valid .p12 file.' . PHP_EOL;
                 }
             }
         }
