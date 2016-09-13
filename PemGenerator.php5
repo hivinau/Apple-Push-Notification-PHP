@@ -29,18 +29,20 @@ function ReadStdin($prompt) {
 
                 if($info->getExtension() != 'p12') {
 
-                    echo 'File \'' . $input . '\' is not a valid .p12 file.' . PHP_EOL;
+                    echo 'File \'' . $input . '\' is not valid a .p12 file.' . PHP_EOL;
                 }
             }
         }
     }
 
-    return array('filename' => $info->getFilename(), 'extension' => $info->getExtension());
+    return $info->getFilename();
 }
 
 $publicCertificate = ReadStdin('Type .p12 file for certificate : ');
 
-exec('openssl pkcs12 -clcerts -nokeys -out ' . $publicCertificate['extension'] . ' -in '. $publicCertificate['filename'], $output, $result);
+$publicCertificateFilename = explode('.', $publicCertificate)[0] . '.pem';
+
+exec('openssl pkcs12 -clcerts -nokeys -out ' . $publicCertificateFilename . ' -in '. $publicCertificate, $output, $result);
 
 if($result !== 0) {
 
@@ -49,7 +51,9 @@ if($result !== 0) {
 
 $privateKey = ReadStdin('Type .p12 file for private key : ');
 
-exec('openssl pkcs12 -nocerts -out ' . $privateKey['extension'] . ' -in '. $privateKey['filename'], $output, $result);
+$privateKeyFilename = explode('.', $privateKey)[0] . '.pem';
+
+exec('openssl pkcs12 -nocerts -out ' . $privateKeyFilename . ' -in '. $privateKey, $output, $result);
 
 if($result !== 0) {
 
@@ -60,7 +64,7 @@ echo 'Type filename for final PEM : ';
 
 $apnsPEM = trim(fgets(STDIN)) . '.pem';
 
-exec('cat ' . $publicCertificate['extension'] . ' ' . $privateKey['extension'] . '> ' . $apnsPEM, $output, $result);
+exec('cat ' . $publicCertificateFilename . ' ' . $privateKeyFilename . ' > ' . $apnsPEM, $output, $result);
 
 if($result !== 0) {
 
