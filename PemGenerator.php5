@@ -23,7 +23,7 @@ function ReadStdin($prompt) {
 
                 echo 'File \'' . $input . '\' does not exist.' . PHP_EOL;
 
-            } else {
+            } else { 
 
                 $info = new SplFileInfo($input);
 
